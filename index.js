@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Collection, Partials } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Partials, ActivityType } = require('discord.js');
 const { token } = require('./config');
 
 const client = new Client({
@@ -11,6 +11,14 @@ const client = new Client({
     GatewayIntentBits.GuildMessageReactions,
   ],
   partials: [Partials.Message, Partials.Channel, Partials.Reaction],
+  // FORCES BOT STATUS TO BE VISIBLY ONLINE INSTEAD OF INVISIBLE
+  presence: {
+    status: 'online',
+    activities: [{
+      name: 'Tickets',
+      type: ActivityType.Watching
+    }]
+  }
 });
 
 client.commands = new Collection();
@@ -39,10 +47,13 @@ const eventFiles = [
   require('./ready'),
 ];
 for (const event of eventFiles) {
+  // Safe check for the event name string mapping
+  const eventName = typeof event.name === 'string' ? event.name : String(event.name);
+  
   if (event.once) {
-    client.once(event.name, (...args) => event.execute(...args, client));
+    client.once(eventName, (...args) => event.execute(...args, client));
   } else {
-    client.on(event.name, (...args) => event.execute(...args, client));
+    client.on(eventName, (...args) => event.execute(...args, client));
   }
 }
 
