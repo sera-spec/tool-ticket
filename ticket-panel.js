@@ -1,40 +1,64 @@
-const {
-  SlashCommandBuilder,
-  EmbedBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ActionRowBuilder,
-  PermissionFlagsBits,
-} = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, PermissionFlagsBits } = require('discord.js');
 const { embedColor } = require('./config');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('ticket-panel')
-    .setDescription('Post the ticket panel in this channel (Admin only)')
+    .setDescription('Spawns the multi-option ticket creation panel')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {
-    const embed = new EmbedBuilder()
+    // 1. Create the Main Embed Panel
+    const panelEmbed = new EmbedBuilder()
       .setColor(embedColor)
-      .setTitle('🎟️ Support Tickets')
+      .setTitle('🎟️ Create a Support Ticket')
       .setDescription(
-        `Need help or want to report something?\n\n` +
-        `Click the button below to open a private ticket.\n` +
-        `You will be asked to provide **image proof** before a moderator joins.`
+        'Click the button below matching the type of assistance you need to open a private ticket:\n\n' +
+        '📩 **Invites Rewards:** Claiming or verifying your invite-related rewards.\n' +
+        '📦 **Chest Rewards:** Claiming or reporting issues with chest items.\n' +
+        '🎉 **Giveaway Rewards:** Claiming prizes won from server giveaways.\n' +
+        '⚙️ **General Support:** All other questions, player reports, or general assistance.'
       )
-      .setFooter({ text: interaction.guild.name })
+      .setFooter({ text: 'Please choose the correct category to receive help faster!' })
       .setTimestamp();
 
-    const openBtn = new ButtonBuilder()
-      .setCustomId('ticket_open')
-      .setLabel('Open a Ticket')
+    // 2. Build the Four Styled Buttons
+    const invitesBtn = new ButtonBuilder()
+      .setCustomId('ticket_invites')
+      .setLabel('Invites Rewards')
+      .setStyle(ButtonStyle.Success)
+      .setEmoji('📩');
+
+    const chestBtn = new ButtonBuilder()
+      .setCustomId('ticket_chest')
+      .setLabel('Chest Rewards')
       .setStyle(ButtonStyle.Primary)
-      .setEmoji('🎟️');
+      .setEmoji('📦');
 
-    const row = new ActionRowBuilder().addComponents(openBtn);
+    const giveawayBtn = new ButtonBuilder()
+      .setCustomId('ticket_giveaway')
+      .setLabel('Giveaway Rewards')
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji('🎉');
 
-    await interaction.channel.send({ embeds: [embed], components: [row] });
-    await interaction.reply({ content: '✅ Ticket panel posted!', ephemeral: true });
+    const generalBtn = new ButtonBuilder()
+      .setCustomId('ticket_general')
+      .setLabel('General Support')
+      .setStyle(ButtonStyle.Danger)
+      .setEmoji('⚙️');
+
+    // 3. Put them into action rows (Discord allows up to 5 buttons per row)
+    const row = new ActionRowBuilder().addComponents(invitesBtn, chestBtn, giveawayBtn, generalBtn);
+
+    // 4. Send the interface panel to the channel
+    await interaction.reply({
+      content: '✅ Ticket panel spawned successfully!',
+      ephemeral: true
+    });
+
+    await interaction.channel.send({
+      embeds: [panelEmbed],
+      components: [row]
+    });
   },
 };
