@@ -17,7 +17,8 @@ module.exports = {
     const { customId, guild, member } = interaction;
 
     // ── Open Ticket ──────────────────────────────────────────────────────────
-    if (customId === 'ticket_open') {
+    // FIXED: Now catches both customId variations so 'create_ticket' doesn't skip execution
+    if (customId === 'ticket_open' || customId === 'create_ticket') {
       await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
 
       // Check if user already has an open ticket
