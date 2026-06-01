@@ -47,7 +47,7 @@ module.exports = {
       .setStyle(ButtonStyle.Danger)
       .setEmoji('⚙️');
 
-    // 3. Put them into action rows (Discord allows up to 5 buttons per row)
+    // 3. Put them into action rows
     const row = new ActionRowBuilder().addComponents(invitesBtn, chestBtn, giveawayBtn, generalBtn);
 
     // 4. Send the interface panel to the channel
