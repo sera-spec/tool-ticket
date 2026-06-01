@@ -4,27 +4,28 @@ module.exports = {
   name: Events.InteractionCreate,
   async execute(interaction, client) {
     
-    // 1. HANDLE BUTTON INTERACTIONS (For your Ticket Panel)
+    // 1. HANDLE TICKET BUTTON INTERACTIONS
     if (interaction.isButton()) {
       console.log(`🔘 Button clicked: ${interaction.customId} by ${interaction.user.tag}`);
       
-      // Look for your button handler file
-      const buttonHandler = require('./ticketButtons'); 
-      
-      if (buttonHandler && buttonHandler.execute) {
-        try {
+      try {
+        const buttonHandler = require('./ticketButtons'); 
+        
+        if (buttonHandler && buttonHandler.execute) {
           await buttonHandler.execute(interaction, client);
-        } catch (error) {
-          console.error(`❌ Error handling button ${interaction.customId}:`, error);
-          if (!interaction.replied && !interaction.deferred) {
-            await interaction.reply({ 
-              content: 'There was an error processing this button action.', 
-              flags: [MessageFlags.Ephemeral] 
-            });
-          }
+        } else {
+          console.error(`❌ ticketButtons.js is missing the "execute" function wrapper.`);
+        }
+      } catch (error) {
+        console.error(`❌ Error handling button ${interaction.customId}:`, error);
+        if (!interaction.replied && !interaction.deferred) {
+          await interaction.reply({ 
+            content: 'There was an error processing this button action.', 
+            flags: [MessageFlags.Ephemeral] 
+          });
         }
       }
-      return; // Stop here so it doesn't try to process it as a slash command
+      return; // Stop processing so it doesn't run slash command logic below
     }
 
     // 2. HANDLE SLASH COMMANDS
