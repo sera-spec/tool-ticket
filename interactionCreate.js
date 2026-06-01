@@ -1,7 +1,7 @@
-const { Events } = require('discord.js');
+const { Events, MessageFlags } = require('discord.js');
 
 module.exports = {
-  name: Events.InteractionCreate, // Properly hooks into the discord.js v15 event system
+  name: Events.InteractionCreate,
   async execute(interaction, client) {
     // Only handle Slash Commands
     if (!interaction.isChatInputCommand()) return;
@@ -19,12 +19,16 @@ module.exports = {
     } catch (error) {
       console.error(`❌ Error executing ${interaction.commandName}:`, error);
       
-      // Prevent crashing and notify the user if something goes wrong internally
-      const errorMessage = { content: 'There was an error while executing this command!', ephemeral: true };
+      // Fixed: Using the correct v15 MessageFlags syntax to prevent response stalls
+      const errorResponse = { 
+        content: 'There was an error while executing this command!', 
+        flags: [MessageFlags.Ephemeral] 
+      };
+
       if (interaction.replied || interaction.deferred) {
-        await interaction.followUp(errorMessage);
+        await interaction.followUp(errorResponse);
       } else {
-        await interaction.reply(errorMessage);
+        await interaction.reply(errorResponse);
       }
     }
   },
