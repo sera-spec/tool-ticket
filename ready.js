@@ -1,8 +1,8 @@
-const { REST, Routes } = require('discord.js');
+const { REST, Routes, Events } = require('discord.js');
 const { token, clientId } = require('./config');
 
 module.exports = {
-  name: 'ready',
+  name: Events.ClientReady, // This fixes the deprecation warning
   once: true,
   async execute(client) {
     console.log(`✅ Logged in as ${client.user.tag}`);
