@@ -1,6 +1,6 @@
-const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const { getTicket, updateTicket } = require('./db');
-const { embedColor, modRoleName } = require('./config');
+const { modRoleName } = require('./config');
 
 module.exports = {
   name: 'messageCreate',
@@ -20,14 +20,25 @@ module.exports = {
     );
 
     if (images.size === 0) {
-      // Remind user to send an image
-      await message.reply({
+      // 1. Delete the user's invalid text message right away
+      await message.delete().catch(() => {});
+
+      // 2. Send the warning embed to the channel
+      const warningMessage = await message.channel.send({
+        content: `<@${message.author.id}>`,
         embeds: [
           new EmbedBuilder()
             .setColor(0xED4245)
             .setDescription('⚠️ Please attach an **image** as proof to proceed. Text-only messages are not accepted in this step.'),
         ],
       }).catch(() => {});
+
+      // 3. Automatically delete the bot's warning message after 5 seconds
+      if (warningMessage) {
+        setTimeout(async () => {
+          await warningMessage.delete().catch(() => {});
+        }, 5000); // 5000 milliseconds = 5 seconds
+      }
       return;
     }
 
