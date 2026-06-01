@@ -1,27 +1,31 @@
+const { Events } = require('discord.js');
+
 module.exports = {
-  name: 'interactionCreate',
+  name: Events.InteractionCreate, // Properly hooks into the discord.js v15 event system
   async execute(interaction, client) {
-    // Slash commands
-    if (interaction.isChatInputCommand()) {
-      const command = client.commands.get(interaction.commandName);
-      if (!command) return;
-      try {
-        await command.execute(interaction, client);
-      } catch (err) {
-        console.error(`[Command Error] /${interaction.commandName}:`, err);
-        const msg = { content: '❌ An error occurred while running this command.', ephemeral: true };
-        if (interaction.replied || interaction.deferred) {
-          await interaction.followUp(msg).catch(() => {});
-        } else {
-          await interaction.reply(msg).catch(() => {});
-        }
-      }
+    // Only handle Slash Commands
+    if (!interaction.isChatInputCommand()) return;
+
+    const command = client.commands.get(interaction.commandName);
+
+    if (!command) {
+      console.error(`❌ No command matching ${interaction.commandName} was found.`);
+      return;
     }
 
-    // Button interactions
-    if (interaction.isButton()) {
-      const ticketButtons = require('./ticketButtons');
-      await ticketButtons(interaction, client);
+    try {
+      // Execute the slash command code
+      await command.execute(interaction, client);
+    } catch (error) {
+      console.error(`❌ Error executing ${interaction.commandName}:`, error);
+      
+      // Prevent crashing and notify the user if something goes wrong internally
+      const errorMessage = { content: 'There was an error while executing this command!', ephemeral: true };
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp(errorMessage);
+      } else {
+        await interaction.reply(errorMessage);
+      }
     }
   },
 };
